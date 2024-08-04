@@ -5,9 +5,23 @@ Solved Frozen lake puzzle for deterministic environment(non-slippery)
 import gymnasium as gym
 import numpy as np
 import pickle
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--is-slippery",
+    action="store_true",
+    help="make slipper surface making environment non-deterministic",
+)
+args = parser.parse_args()
+
 
 env = gym.make(
-    "FrozenLake-v1", render_mode="human", desc=None, map_name="4x4", is_slippery=False
+    "FrozenLake-v1",
+    render_mode="human",
+    desc=None,
+    map_name="4x4",
+    is_slippery=args.is_slippery,
 )
 observation, info = env.reset()
 
@@ -19,7 +33,10 @@ class QAgent:
         self.possible_states = states
         self.possible_actions = actions
         try:
-            with open("brain.pkl", "rb") as f:
+            with open(
+                f"brain_{'non_slippery' if args.is_slippery is False else 'slippery'}.pkl",
+                "rb",
+            ) as f:
                 self.q_table = pickle.load(f)
         except FileNotFoundError:
             # self.q_table = np.random.randn(states, actions)
@@ -74,6 +91,8 @@ for episode in range(1_000):
         print("Agent succeded five time stoping iteration")
         break
 
-with open("brain.pkl", "wb") as f:
+with open(
+    f"brain_{'non_slippery' if args.is_slippery is False else 'slippery'}.pkl", "wb"
+) as f:
     pickle.dump(agent.q_table, f)
 env.close()
