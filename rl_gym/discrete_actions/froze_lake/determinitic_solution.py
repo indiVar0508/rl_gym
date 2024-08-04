@@ -47,6 +47,7 @@ class QAgent:
 
 agent = QAgent()
 attempt = 0
+success_counter = 0
 for episode in range(1_000):
     action = agent.act(observation, episode)
     old_observation = observation
@@ -62,10 +63,16 @@ for episode in range(1_000):
     if terminated or truncated:
         attempt += 1
         if reward == 1:
-            # FIXME: Add logic if continously reaching goal then stop and save the brain
             print("Success at, ", sep="", end="")
+            success_counter += 1
+        else:
+            success_counter = 0
         print(f"game attempt {attempt}")
         observation, info = env.reset()
+
+    if success_counter == 5:
+        print("Agent succeded five time stoping iteration")
+        break
 
 with open("brain.pkl", "wb") as f:
     pickle.dump(agent.q_table, f)
